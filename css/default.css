@@ -1,0 +1,27 @@
+@media (min-width: 979px) {
+  .container {
+    width: 450px;
+  }
+}
+
+@media (min-width: 450px) {
+  .plugin-container .description {
+        float: right;
+  }
+}
+
+@media (max-width: 450px) {
+  .footer {
+    display: none;
+  }
+  input {
+    width: 125px;
+  }
+  select {
+    width: 140px;
+  }
+}
+
+.row h1,h2,h3 {
+  margin-top: 5px;
+}
