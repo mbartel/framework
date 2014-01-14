@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Author: Michael Bartel <Michael.Bartel@gmx.net>
+ */
+
+include ROOT . 'lib/smarty/Smarty.class.php';
+
 class Template {
 
   static private $tpl;
@@ -42,7 +48,7 @@ class Template {
       self::$stylesheets[$stylesheet] = $stylesheet;
     }
   }
-  
+
   /**
    * Adds javascript to template
    * @param string $javascript
@@ -105,8 +111,8 @@ class Template {
       self::$stylesheets = array();
     }
     return self::$stylesheets;
-  }  
-  
+  }
+
   /**
    * Returns javascripts array
    * @return array

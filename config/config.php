@@ -9,14 +9,12 @@ define('TEMPLATE_DIR', ROOT . 'templates/');
 define('TEMPLATE_COMPILE_DIR', ROOT . 'tmp/');
 define('TEMPLATE_CACHE', ROOT . 'tmp/');
 
-define('TIMEZONE', 'Europe/Berlin');
-define('LANGUAGE', 'de_DE');
 define('SESSIONTIMEOUT', 60 * 30);
 
-$USERS = array(
-  array(
-    'email' => 'Michael.Bartel@gmx.net',
-    'password' => '7c1d0e13a018257a6f35ca0477ca002f',
-    'name' => 'Michael Bartel'
-  )
-);
+error_reporting(E_ALL & ~E_NOTICE);
+date_default_timezone_set('Europe/Berlin');
+setlocale(LC_ALL, 'de_DE');
+
+$CLASSPATH = array('lib/', 'lib/db/');
+
+include ROOT . 'inc.functions.php';

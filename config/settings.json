@@ -1,3 +1,9 @@
 {
-  "name": "mbartel"
+  "users" : [
+      {
+        "email" : "Michael.Bartel@gmx.net",
+        "password": "7c1d0e13a018257a6f35ca0477ca002f",
+        "name" : "Michael Bartel"
+      }
+  ]
 }

@@ -3,7 +3,7 @@
 /**
  * HTTP Request helper class
  *
- * @author mbartel
+ * @author mbartel (Michael.Bartel@gmx.net)
  */
 class Session {
 
@@ -159,14 +159,14 @@ class Session {
    */
   public static function init() {
     self::startSession();
-    
+
     // deliver static content
     self::deliverStaticContent();
 
     // Bootstrap
     Template::addStyleSheet('bootstrap.min');
     Template::addStyleSheet('bootstrap-theme.min');
-    
+
     // jQuery
     Template::addJavaScript('jquery-2.0.3.min');
     Template::addJavaScript('bootstrap.min');
@@ -205,7 +205,7 @@ class Session {
       $email = strtolower($email);
       $passwd = md5(self::param('password'));
 
-      foreach ($USERS as $user) {
+      foreach (Settings::get('users') as $user) {
         if ($email == strtolower($user['email']) && ($passwd == $user['password'] || md5($passwd) == $user['password'])) {
           self::setSessionValue('user', $user);
           self::setSessionValue('last_login', time());
@@ -213,7 +213,7 @@ class Session {
         }
       }
     }
-    
+
     Template::display();
     die();
   }
