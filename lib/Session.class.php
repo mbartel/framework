@@ -7,6 +7,8 @@
  */
 class Session {
 
+  const DAY_IN_SECONDS = 86400;
+  
   private static $params = array();
 
   /**
@@ -62,39 +64,6 @@ class Session {
   public static function writeStatus($status = 200, $message = 'OK') {
     header('HTTP/1.0 ' . $status . ' ' . $message);
     header('Status: ' . $status . ' ' . $message);
-  }
-
-  /**
-   * Starts/initializes the user session
-   */
-  private static function startSession() {
-    session_start();
-  }
-
-  /**
-   * Destroyes the user session
-   */
-  private static function destroySession() {
-    session_unset();
-    session_destroy();
-    setcookie(session_name(), NULL, time() - SESSIONTIMEOUT - 1);
-  }
-
-  /**
-   * Checks if the user is logged in correctly and redirects to the login page if not
-   */
-  private static function check() {
-    $last_login = self::getSessionValue('last_login');
-    if ($last_login != null && $last_login < time() + SESSIONTIMEOUT) {
-      self::setSessionValue('last_login', time());
-    } else {
-      self::destroySession();
-      self::redirectTo(BASE_URL . 'login');
-    }
-
-    if (!self::isLoggedIn()) {
-      self::redirectTo(BASE_URL . 'login');
-    }
   }
 
   /**
@@ -158,7 +127,7 @@ class Session {
    * Initializes the session object
    */
   public static function init() {
-    self::startSession();
+    session_start();
 
     // deliver static content
     self::deliverStaticContent();
@@ -166,6 +135,7 @@ class Session {
     // Bootstrap
     Template::addStyleSheet('bootstrap.min');
     Template::addStyleSheet('bootstrap-theme.min');
+    Template::addStyleSheet('font-awesome.min.css');
 
     // jQuery
     Template::addJavaScript('jquery-2.0.3.min');
@@ -192,12 +162,57 @@ class Session {
   }
 
   /**
+   * Destroyes the user session
+   */
+  private static function destroySession() {
+    $_SESSION = array();
+    session_unset();
+    session_destroy();
+    setcookie(session_name(), NULL, time() - SESSIONTIMEOUT - 1);
+    unset($_COOKIE['smarthome-remember-login']);
+    setcookie('smarthome-remember-login', '', -1);
+  }
+
+  /**
+   * Updates the user session and last login timer
+   * @param type $email the email address of the user
+   */
+  private static function doLogin($email) {
+    $user = Settings::userByEmail($email);
+    self::setSessionValue('user', $user);
+    self::setSessionValue('last_login', time());
+    setcookie('smarthome-remember-login', base64_encode($email . ':' . md5(md5($user['password']), md5(json_encode($user)))), time() + (self::DAY_IN_SECONDS * 3));
+  }
+
+  /**
+   * Checks if the user is logged in correctly and redirects to the login page if not
+   */
+  private static function check() {
+    // check session timeout
+    $last_login = self::getSessionValue('last_login');
+    if ($last_login != null && $last_login < time() + SESSIONTIMEOUT) {
+      self::setSessionValue('last_login', time());
+    } else {
+      // check if remember-me cookie is set
+      if (isset($_COOKIE['smarthome-remember-login'])) {
+        list($email, $hashed_passwd) = explode(':', base64_decode($_COOKIE['smarthome-remember-login']));
+        $user = Settings::userByEmail($email);
+        if (md5(md5($user['password']), md5(json_encode($user))) == $hashed_passwd) {
+          self::doLogin($email);
+        }
+      }
+    }
+
+    if (!self::isLoggedIn()) {
+      self::destroySession();
+      self::redirectTo(BASE_URL . 'login');
+    }
+  }
+
+  /**
    * Shows the login page and handles the user login
-   * @global type $USERS predefined user list
    */
   private static function loginPage() {
-    global $USERS;
-
     Template::setTemplate('login');
 
     $email = self::param('email');
@@ -205,12 +220,10 @@ class Session {
       $email = strtolower($email);
       $passwd = md5(self::param('password'));
 
-      foreach (Settings::get('users') as $user) {
-        if ($email == strtolower($user['email']) && ($passwd == $user['password'] || md5($passwd) == $user['password'])) {
-          self::setSessionValue('user', $user);
-          self::setSessionValue('last_login', time());
-          self::redirectTo(BASE_URL);
-        }
+      $user = Settings::userByEmail($email);
+      if ($email == strtolower($user['email']) && ($passwd == $user['password'] || $passwd == md5($user['password']))) {
+        self::doLogin($email);
+        self::redirectTo(BASE_URL);
       }
     }
 

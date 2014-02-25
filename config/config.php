@@ -1,8 +1,8 @@
 <?php
 
 define('ROOT', str_replace('config', '', __DIR__));
-define('BASE_URL', 'http://cubus/smarthome/');
-define('PAGETITLE', 'SmartHome');
+define('BASE_URL', 'http://cubus/framework/');
+define('PAGETITLE', 'Framework');
 define('REWRITE_PARAM', 'p');
 
 define('TEMPLATE_DIR', ROOT . 'templates/');
